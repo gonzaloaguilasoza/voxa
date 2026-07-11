@@ -1,7 +1,15 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Voxa — Tu especialista en contenido</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  html, body{ margin:0; padding:0; background:#FFFFFF; }
+  body{ padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom); }
   :root{
     --ink:#14141A; --ink-soft:#5B5B66; --line:#E7E7EC; --line-soft:#F1F1F4;
     --accent:#2F3EFF; --accent-soft:#EEF0FF;
@@ -96,6 +104,8 @@
   .voxa-main.show{ display:block; }
   .voxa-edit-profile{ display:block; margin:0 auto 1.5rem; background:transparent; border:none; color:var(--ink-soft); font-family:'Inter'; font-size:12px; text-decoration:underline; cursor:pointer; }
 </style>
+</head>
+<body>
 
 <div id="voxa-root">
   <div class="voxa-brand">
@@ -312,17 +322,15 @@
   }
 
   async function callVoxa(system, userContent){
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
+    var response = await fetch('/.netlify/functions/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        system: system,
-        messages: [{ role: 'user', content: userContent }]
-      })
+      body: JSON.stringify({ system: system, message: userContent })
     });
     var data = await response.json();
+    if(!response.ok){
+      throw new Error(data.error || 'Error llamando a Voxa.');
+    }
     var textBlock = (data.content || []).find(function(b){ return b.type === 'text'; });
     var raw = textBlock ? textBlock.text : '';
     var clean = raw.replace(/```json|```/g, '').trim();
@@ -476,7 +484,7 @@
       var synthesisSystem = 'Eres un estratega de marca personal experto en multiples nichos de creacion de contenido (salud, fitness, psicologia, negocios, nutricion, desarrollo personal, y otros). Recibiras las respuestas de un cuestionario. Sintetiza esto en un perfil de marca estructurado y accionable. Responde EXCLUSIVAMENTE con un objeto JSON valido, sin texto antes ni despues, sin markdown, con esta forma exacta: ' + PROFILE_JSON_SHAPE;
       var newProfile = await callVoxa(synthesisSystem, summary);
       profile = newProfile;
-      await window.storage.set(PROFILE_KEY, JSON.stringify(profile));
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
       activateMainScreen();
     }catch(err){
       console.error(err);
@@ -505,11 +513,11 @@
     startOnboarding();
   });
 
-  async function init(){
+  function init(){
     try{
-      var stored = await window.storage.get(PROFILE_KEY);
-      if(stored && stored.value){
-        profile = JSON.parse(stored.value);
+      var stored = localStorage.getItem(PROFILE_KEY);
+      if(stored){
+        profile = JSON.parse(stored);
         activateMainScreen();
         return;
       }
@@ -520,3 +528,7 @@
   init();
 })();
 </script>
+
+</div>
+</body>
+</html>
