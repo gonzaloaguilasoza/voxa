@@ -23,7 +23,7 @@ exports.handler = async function (event) {
       };
     }
 
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent';
 
     var response = await fetch(url, {
       method: 'POST',
