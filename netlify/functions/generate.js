@@ -7,6 +7,7 @@ exports.handler = async function (event) {
     var body = JSON.parse(event.body);
     var system = body.system;
     var message = body.message;
+    var images = body.images || [];
 
     if (!system || !message) {
       return {
@@ -25,6 +26,14 @@ exports.handler = async function (event) {
 
     var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent';
 
+    var parts = [];
+    images.forEach(function (img) {
+      if (img && img.data && img.mediaType) {
+        parts.push({ inline_data: { mime_type: img.mediaType, data: img.data } });
+      }
+    });
+    parts.push({ text: message });
+
     var response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -33,7 +42,7 @@ exports.handler = async function (event) {
       },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: system }] },
-        contents: [{ role: 'user', parts: [{ text: message }] }]
+        contents: [{ role: 'user', parts: parts }]
       })
     });
 
