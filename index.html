@@ -70,6 +70,31 @@
   .voxa-alt-hook{ font-size:16px; line-height:1.5; font-weight:500; margin:0 0 1.1rem; }
 
   .voxa-again-btn{ background:transparent; border:1px solid var(--line); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12.5px; letter-spacing:0.04em; text-transform:uppercase; padding:11px 24px; border-radius:99px; cursor:pointer; width:100%; margin-top:0.5rem; }
+
+  .voxa-onboarding{ display:none; }
+  .voxa-onboarding.show{ display:block; }
+  .voxa-onb-progress{ height:4px; background:var(--line-soft); border-radius:99px; overflow:hidden; margin-bottom:14px; }
+  .voxa-onb-progress-fill{ height:100%; background:var(--accent); border-radius:99px; transition:width 0.3s ease; width:14%; }
+  .voxa-onb-step{ font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 18px; text-align:center; }
+  .voxa-onb-question{ font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:600; line-height:1.35; text-align:center; margin:0 0 22px; }
+
+  .voxa-onb-mic-btn{ width:60px; height:60px; border-radius:50%; background:var(--ink); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; transition:transform 0.15s ease, background 0.2s ease; }
+  .voxa-onb-mic-btn:active{ transform:scale(0.96); }
+  .voxa-onb-mic-btn.listening{ background:var(--accent); animation:voxa-pulse 1.6s ease-out infinite; }
+  .voxa-onb-mic-btn svg{ width:22px; height:22px; }
+  .voxa-onb-mic-label{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-soft); text-align:center; margin:0 0 16px; }
+  .voxa-onb-textarea{ width:100%; min-height:90px; background:#FAFAFB; border:1px solid var(--line); border-radius:12px; padding:12px 14px; color:var(--ink); font-family:'Inter'; font-size:14.5px; line-height:1.55; resize:vertical; outline:none; }
+  .voxa-onb-textarea:focus{ border-color:var(--accent); }
+  .voxa-onb-tip{ font-size:11.5px; color:var(--ink-soft); margin:8px 2px 0; }
+  .voxa-onb-actions{ display:flex; gap:10px; margin-top:1.25rem; }
+  .voxa-onb-back{ background:transparent; border:1px solid var(--line); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; letter-spacing:0.02em; padding:13px 20px; border-radius:99px; cursor:pointer; }
+  .voxa-onb-back:disabled{ opacity:0.3; cursor:default; }
+  .voxa-onb-next{ flex:1; background:var(--ink); border:none; color:#FFFFFF; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; letter-spacing:0.02em; padding:13px 20px; border-radius:99px; cursor:pointer; }
+  .voxa-onb-next:disabled{ opacity:0.4; cursor:default; }
+
+  .voxa-main{ display:none; }
+  .voxa-main.show{ display:block; }
+  .voxa-edit-profile{ display:block; margin:0 auto 1.5rem; background:transparent; border:none; color:var(--ink-soft); font-family:'Inter'; font-size:12px; text-decoration:underline; cursor:pointer; }
 </style>
 
 <div id="voxa-root">
@@ -82,29 +107,57 @@
     <span class="voxa-brand-name">Voxa</span>
   </div>
 
-  <div class="voxa-stage">
-    <button class="voxa-mic-btn" id="voxa-mic-btn" aria-label="Hablar">
-      <svg viewBox="0 0 24 24" fill="none" id="voxa-mic-icon">
+  <div class="voxa-onboarding" id="voxa-onboarding">
+    <div class="voxa-onb-progress">
+      <div class="voxa-onb-progress-fill" id="voxa-onb-progress-fill"></div>
+    </div>
+    <p class="voxa-onb-step" id="voxa-onb-step">Pregunta 1 de 7</p>
+    <p class="voxa-onb-question" id="voxa-onb-question"></p>
+
+    <button class="voxa-onb-mic-btn" id="voxa-onb-mic-btn" aria-label="Hablar tu respuesta">
+      <svg viewBox="0 0 24 24" fill="none">
         <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" stroke="#FFFFFF" stroke-width="1.7"/>
         <path d="M7 11v1a5 5 0 0 0 10 0v-1M12 17v3" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round"/>
       </svg>
     </button>
-    <p class="voxa-stage-label" id="voxa-stage-label">Toca para contarme tu idea</p>
-    <p class="voxa-transcript" id="voxa-transcript"></p>
+    <p class="voxa-onb-mic-label" id="voxa-onb-mic-label">Toca para responder por voz</p>
 
-    <div class="voxa-fallback" id="voxa-fallback">
-      <textarea id="voxa-textarea" placeholder="Cuéntame qué leíste, qué te pasó, o qué idea tienes..."></textarea>
-      <p class="voxa-fallback-tip">Tip: usa el micrófono de tu teclado para dictar aquí mismo.</p>
+    <textarea id="voxa-onb-answer" class="voxa-onb-textarea" placeholder=""></textarea>
+    <p class="voxa-onb-tip">También puedes escribir directo, o usar el micrófono de tu teclado.</p>
+    <div class="voxa-onb-actions">
+      <button class="voxa-onb-back" id="voxa-onb-back">Atrás</button>
+      <button class="voxa-onb-next" id="voxa-onb-next">Siguiente</button>
     </div>
-
-    <button class="voxa-generate-btn" id="voxa-generate-btn">Generar guion</button>
-    <p class="voxa-status" id="voxa-status"></p>
+    <p class="voxa-status" id="voxa-onb-status"></p>
   </div>
 
-  <div class="voxa-result" id="voxa-result">
-    <span class="voxa-pillar-tag" id="voxa-pillar-tag"></span>
-    <div id="voxa-alternatives"></div>
-    <button class="voxa-again-btn" id="voxa-again-btn">Contar otra idea</button>
+  <div class="voxa-main" id="voxa-main">
+    <button class="voxa-edit-profile" id="voxa-edit-profile">Editar mi perfil</button>
+
+    <div class="voxa-stage">
+      <button class="voxa-mic-btn" id="voxa-mic-btn" aria-label="Hablar">
+        <svg viewBox="0 0 24 24" fill="none" id="voxa-mic-icon">
+          <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" stroke="#FFFFFF" stroke-width="1.7"/>
+          <path d="M7 11v1a5 5 0 0 0 10 0v-1M12 17v3" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <p class="voxa-stage-label" id="voxa-stage-label">Toca para contarme tu idea</p>
+      <p class="voxa-transcript" id="voxa-transcript"></p>
+
+      <div class="voxa-fallback" id="voxa-fallback">
+        <textarea id="voxa-textarea" placeholder="Cuéntame qué leíste, qué te pasó, o qué idea tienes..."></textarea>
+        <p class="voxa-fallback-tip">Tip: usa el micrófono de tu teclado para dictar aquí mismo.</p>
+      </div>
+
+      <button class="voxa-generate-btn" id="voxa-generate-btn">Generar guion</button>
+      <p class="voxa-status" id="voxa-status"></p>
+    </div>
+
+    <div class="voxa-result" id="voxa-result">
+      <span class="voxa-pillar-tag" id="voxa-pillar-tag"></span>
+      <div id="voxa-alternatives"></div>
+      <button class="voxa-again-btn" id="voxa-again-btn">Contar otra idea</button>
+    </div>
   </div>
 </div>
 
@@ -117,13 +170,37 @@
     'Conexión': { bg:'var(--tag-conexion-bg)', tx:'var(--tag-conexion-tx)' }
   };
 
-  var BASE_CONTEXT = 'Gonzalo, lider de network marketing chileno con 11 anos de experiencia, Double Diamond en NVU, ahora Senior Manager construyendo Equipo Riman Mastermind (marca coreana K-Beauty). Posicionamiento: "el mentor que ya cayo, ya perdio y ya empezo de cero varias veces, por eso tiene el sistema real para que otros no caigan tanto como el". Las caidas se mencionan solo por encima, nunca en detalle explicito. Audiencia: 78% tiene 25-44 anos, 62% Chile, 54% mujeres. Le funciona mejor el contenido personal o de liderazgo con fe que el contenido de venta directa. Odia mostrar autos, casas, lujo, y humor forzado. Es fuerte hablando en escenario o en vivo, incomodo en monologos forzados a camara. Integra su fe solo en contenido de liderazgo, no en todo. Referentes de estilo: storytelling emocional tipo Dante Gebel, estructura Hook-Retain-Reward tipo Alex Hormozi, sistema diario tipo Gustavo Salinas.';
+  var QUESTIONS = [
+    { key:'nicho', q:'¿En qué área creas contenido?', ph:'Ej: nutrición, fitness, psicología, negocios, desarrollo personal...' },
+    { key:'diferencia', q:'¿Qué te diferencia de otros en tu área?', ph:'Ej: mi propia experiencia superando algo, mi forma de explicar simple, mi método propio...' },
+    { key:'resultado', q:'¿Qué resultado quieres que la gente asocie con tu nombre en 12 meses?', ph:'Ej: "el psicólogo que ayuda a soltar la ansiedad", "la nutricionista que hace fácil comer sano"...' },
+    { key:'audiencia', q:'¿Quién es tu audiencia principal?', ph:'Ej: mujeres de 30-45 que quieren bajar de peso sin dietas extremas' },
+    { key:'camara', q:'¿Qué tan cómodo te sientes hablando a cámara?', ph:'Ej: me da vergüenza al principio, soy mejor en vivo, me siento natural...' },
+    { key:'evitar', q:'¿Hay algo que odies mostrar o hacer en tus contenidos?', ph:'Ej: lujo, humor forzado, bailes, mostrar tu casa...' },
+    { key:'tono', q:'¿Qué tono quieres transmitir?', ph:'Ej: mentor cercano, autoridad técnica, movimiento y comunidad...' }
+  ];
+
+  var PROFILE_KEY = 'voxa-profile';
+  var currentQuestion = 0;
+  var answers = {};
+  var profile = null;
+  var DRAFT_SYSTEM = '';
+  var REVIEW_SYSTEM = '';
 
   var JSON_SHAPE = '{"pilar": "Autoridad" o "Educacion" o "Comunidad" o "Conexion", "alternativas": [{"enfoque": "nombre corto del tipo de hook usado en esta alternativa", "hook": "el hook completo de esta alternativa", "estructura": {"contexto": "que decir en los primeros 3-8 segundos", "desarrollo": "el cuerpo del guion en 2-3 frases", "giro": "la aplicacion o aprendizaje en 1-2 frases", "cierre_cta": "frase de cierre memorable mas una accion concreta"}, "caption": "caption corto listo para copiar y pegar"}, {"enfoque":"...","hook":"...","estructura":{"contexto":"...","desarrollo":"...","giro":"...","cierre_cta":"..."},"caption":"..."}, {"enfoque":"...","hook":"...","estructura":{"contexto":"...","desarrollo":"...","giro":"...","cierre_cta":"..."},"caption":"..."}]}';
 
-  var DRAFT_SYSTEM = 'Eres un especialista en creacion de contenido para redes sociales, estratega personal de marca de ' + BASE_CONTEXT + ' Dado un tema o idea que te comparte, genera un primer borrador con 3 ALTERNATIVAS COMPLETAS distintas entre si (no solo hooks distintos, sino enfoques narrativos distintos para contar la misma idea). Responde EXCLUSIVAMENTE con un objeto JSON valido, sin texto antes ni despues, sin markdown, con esta forma exacta: ' + JSON_SHAPE + ' Cada alternativa debe usar un tipo de hook distinto entre si (elige entre: confesion, contradiccion, in medias res, pregunta directa, dato de shock, promesa audaz, reto directo, lista numerada), priorizando confesion, contradiccion e in medias res para al menos 2 de las 3. Todo en espanol de Chile, tono cercano, sin sonar corporativo ni de venta agresiva.';
+  var PROFILE_JSON_SHAPE = '{"nicho": "area de contenido resumida en pocas palabras", "posicionamiento": "frase de posicionamiento personal en 1-2 oraciones", "audiencia": "resumen de la audiencia principal en 1 oracion", "tono": "tono deseado en pocas palabras", "evitar": "lista breve separada por comas de lo que debe evitarse", "notas_camara": "como se siente esta persona frente a camara, resumido en 1 frase"}';
 
-  var REVIEW_SYSTEM = 'Eres un editor senior de contenido revisando el trabajo de otro especialista para ' + BASE_CONTEXT + ' Te llega la idea original del usuario y un borrador en JSON con 3 alternativas completas. Revisalo con ojo critico: verifica que ninguna alternativa mencione autos, casas, lujo, ostentacion o humor forzado; verifica que las caidas personales (si aparecen) esten mencionadas solo por encima, nunca en detalle explicito; verifica que las 3 alternativas sean realmente distintas entre si en enfoque, no variaciones minimas de la misma idea; verifica que cada caption sea corto y natural, no corporativo. Corrige lo que haga falta y devuelve la version final mejorada. Responde EXCLUSIVAMENTE con el objeto JSON final corregido, misma forma exacta: ' + JSON_SHAPE + ' Sin texto antes ni despues, sin markdown.';
+  function buildSystemPrompts(profileContext){
+    DRAFT_SYSTEM = 'Eres un especialista en creacion de contenido para redes sociales, estratega personal de marca de ' + profileContext + ' Dado un tema o idea que te comparte, genera un primer borrador con 3 ALTERNATIVAS COMPLETAS distintas entre si (no solo hooks distintos, sino enfoques narrativos distintos para contar la misma idea). Responde EXCLUSIVAMENTE con un objeto JSON valido, sin texto antes ni despues, sin markdown, con esta forma exacta: ' + JSON_SHAPE + ' Cada alternativa debe usar un tipo de hook distinto entre si (elige entre: confesion, contradiccion, in medias res, pregunta directa, dato de shock, promesa audaz, reto directo, lista numerada), priorizando los tipos de hook mas coherentes con el tono de esta persona. Todo en espanol de Chile, tono cercano, sin sonar corporativo ni de venta agresiva.';
+
+    REVIEW_SYSTEM = 'Eres un editor senior de contenido revisando el trabajo de otro especialista para ' + profileContext + ' Te llega la idea original del usuario y un borrador en JSON con 3 alternativas completas. Revisalo con ojo critico: verifica que ninguna alternativa mencione lo que esta persona pidio evitar; verifica que las 3 alternativas sean realmente distintas entre si en enfoque, no variaciones minimas de la misma idea; verifica que cada caption sea corto y natural, no corporativo. Corrige lo que haga falta y devuelve la version final mejorada. Responde EXCLUSIVAMENTE con el objeto JSON final corregido, misma forma exacta: ' + JSON_SHAPE + ' Sin texto antes ni despues, sin markdown.';
+  }
+
+  function profileToContext(p){
+    return 'una persona que crea contenido en el area de ' + p.nicho + '. Posicionamiento personal: "' + p.posicionamiento + '". Audiencia: ' + p.audiencia + '. Tono deseado: ' + p.tono + '. Cosas a evitar siempre: ' + p.evitar + '. Sobre hablar en camara: ' + p.notas_camara + '.';
+  }
+
 
   var micBtn = document.getElementById('voxa-mic-btn');
   var stageLabel = document.getElementById('voxa-stage-label');
@@ -292,5 +369,154 @@
     stageLabel.textContent = 'Toca para contarme tu idea';
     window.scrollTo({ top:0, behavior:'smooth' });
   });
+
+  var onboardingEl = document.getElementById('voxa-onboarding');
+  var mainEl = document.getElementById('voxa-main');
+  var onbProgressFill = document.getElementById('voxa-onb-progress-fill');
+  var onbStepLabel = document.getElementById('voxa-onb-step');
+  var onbQuestionLabel = document.getElementById('voxa-onb-question');
+  var onbAnswerInput = document.getElementById('voxa-onb-answer');
+  var onbBackBtn = document.getElementById('voxa-onb-back');
+  var onbNextBtn = document.getElementById('voxa-onb-next');
+  var onbStatus = document.getElementById('voxa-onb-status');
+  var editProfileBtn = document.getElementById('voxa-edit-profile');
+  var onbMicBtn = document.getElementById('voxa-onb-mic-btn');
+  var onbMicLabel = document.getElementById('voxa-onb-mic-label');
+
+  var onbRecognition = null;
+  var isOnbListening = false;
+
+  if(SpeechRec){
+    onbRecognition = new SpeechRec();
+    onbRecognition.lang = 'es-CL';
+    onbRecognition.continuous = true;
+    onbRecognition.interimResults = true;
+
+    onbRecognition.onresult = function(event){
+      var transcript = '';
+      for(var i=0; i<event.results.length; i++){
+        transcript += event.results[i][0].transcript;
+      }
+      onbAnswerInput.value = transcript;
+    };
+    onbRecognition.onerror = function(){
+      stopOnbListening();
+      onbMicLabel.textContent = 'No se pudo usar el micrófono — escribe tu respuesta';
+    };
+    onbRecognition.onend = function(){
+      if(isOnbListening){ stopOnbListening(); }
+    };
+  } else {
+    onbMicBtn.style.display = 'none';
+    onbMicLabel.textContent = 'Escribe tu respuesta abajo';
+  }
+
+  function startOnbListening(){
+    if(!onbRecognition) return;
+    isOnbListening = true;
+    onbMicBtn.classList.add('listening');
+    onbMicLabel.textContent = 'Escuchando... toca de nuevo para terminar';
+    try{ onbRecognition.start(); }
+    catch(e){ onbMicLabel.textContent = 'No se pudo usar el micrófono — escribe tu respuesta'; }
+  }
+
+  function stopOnbListening(){
+    isOnbListening = false;
+    onbMicBtn.classList.remove('listening');
+    onbMicLabel.textContent = 'Toca para responder por voz';
+    if(onbRecognition){ try{ onbRecognition.stop(); }catch(e){} }
+  }
+
+  onbMicBtn.addEventListener('click', function(){
+    if(isOnbListening){ stopOnbListening(); } else { startOnbListening(); }
+  });
+
+  function renderQuestion(){
+    if(isOnbListening){ stopOnbListening(); }
+    var q = QUESTIONS[currentQuestion];
+    onbStepLabel.textContent = 'Pregunta ' + (currentQuestion+1) + ' de ' + QUESTIONS.length;
+    onbQuestionLabel.textContent = q.q;
+    onbAnswerInput.placeholder = q.ph;
+    onbAnswerInput.value = answers[q.key] || '';
+    onbProgressFill.style.width = Math.round(((currentQuestion+1)/QUESTIONS.length)*100) + '%';
+    onbBackBtn.disabled = currentQuestion === 0;
+    onbNextBtn.textContent = currentQuestion === QUESTIONS.length - 1 ? 'Crear mi perfil' : 'Siguiente';
+    onbStatus.textContent = '';
+    if(onbRecognition){ onbMicLabel.textContent = 'Toca para responder por voz'; }
+  }
+
+  onbBackBtn.addEventListener('click', function(){
+    if(currentQuestion === 0) return;
+    answers[QUESTIONS[currentQuestion].key] = onbAnswerInput.value.trim();
+    currentQuestion -= 1;
+    renderQuestion();
+  });
+
+  onbNextBtn.addEventListener('click', async function(){
+    var val = onbAnswerInput.value.trim();
+    if(!val){
+      onbStatus.textContent = 'Responde antes de continuar.';
+      onbStatus.className = 'voxa-status error';
+      return;
+    }
+    answers[QUESTIONS[currentQuestion].key] = val;
+
+    if(currentQuestion < QUESTIONS.length - 1){
+      currentQuestion += 1;
+      renderQuestion();
+      return;
+    }
+
+    onbNextBtn.disabled = true;
+    onbStatus.className = 'voxa-status';
+    onbStatus.textContent = 'Creando tu perfil de marca...';
+
+    try{
+      var summary = QUESTIONS.map(function(q){ return q.q + ' ' + answers[q.key]; }).join('\n');
+      var synthesisSystem = 'Eres un estratega de marca personal experto en multiples nichos de creacion de contenido (salud, fitness, psicologia, negocios, nutricion, desarrollo personal, y otros). Recibiras las respuestas de un cuestionario. Sintetiza esto en un perfil de marca estructurado y accionable. Responde EXCLUSIVAMENTE con un objeto JSON valido, sin texto antes ni despues, sin markdown, con esta forma exacta: ' + PROFILE_JSON_SHAPE;
+      var newProfile = await callVoxa(synthesisSystem, summary);
+      profile = newProfile;
+      await window.storage.set(PROFILE_KEY, JSON.stringify(profile));
+      activateMainScreen();
+    }catch(err){
+      console.error(err);
+      onbStatus.textContent = 'No se pudo crear el perfil. Intenta de nuevo.';
+      onbStatus.className = 'voxa-status error';
+    }finally{
+      onbNextBtn.disabled = false;
+    }
+  });
+
+  function activateMainScreen(){
+    buildSystemPrompts(profileToContext(profile));
+    onboardingEl.classList.remove('show');
+    mainEl.classList.add('show');
+  }
+
+  function startOnboarding(){
+    currentQuestion = 0;
+    answers = {};
+    mainEl.classList.remove('show');
+    onboardingEl.classList.add('show');
+    renderQuestion();
+  }
+
+  editProfileBtn.addEventListener('click', function(){
+    startOnboarding();
+  });
+
+  async function init(){
+    try{
+      var stored = await window.storage.get(PROFILE_KEY);
+      if(stored && stored.value){
+        profile = JSON.parse(stored.value);
+        activateMainScreen();
+        return;
+      }
+    }catch(e){}
+    startOnboarding();
+  }
+
+  init();
 })();
 </script>
