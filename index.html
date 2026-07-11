@@ -103,6 +103,11 @@
   .voxa-main{ display:none; }
   .voxa-main.show{ display:block; }
   .voxa-edit-profile{ display:block; margin:0 auto 1.5rem; background:transparent; border:none; color:var(--ink-soft); font-family:'Inter'; font-size:12px; text-decoration:underline; cursor:pointer; }
+
+  .voxa-welcome{ display:none; text-align:center; padding:2.5rem 0 1rem; }
+  .voxa-welcome.show{ display:block; }
+  .voxa-welcome-title{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:26px; line-height:1.25; margin:0 0 12px; }
+  .voxa-welcome-sub{ font-size:14.5px; color:var(--ink-soft); margin:0 0 2rem; }
 </style>
 </head>
 <body>
@@ -115,6 +120,12 @@
       <path d="M23 25l9 15 9-15" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>
     <span class="voxa-brand-name">Voxa</span>
+  </div>
+
+  <div class="voxa-welcome" id="voxa-welcome">
+    <p class="voxa-welcome-title">Tu idea merece<br>salir de tu cabeza.</p>
+    <p class="voxa-welcome-sub">Habla tu idea. Voxa hace el resto.</p>
+    <button class="voxa-onb-next" id="voxa-welcome-start" style="width:100%;">Empezar</button>
   </div>
 
   <div class="voxa-onboarding" id="voxa-onboarding">
@@ -321,6 +332,20 @@
     resultEl.classList.add('show');
   }
 
+  function extractJson(raw){
+    var clean = raw.replace(/```json|```/g, '').trim();
+    try{
+      return JSON.parse(clean);
+    }catch(e){
+      var start = clean.indexOf('{');
+      var end = clean.lastIndexOf('}');
+      if(start !== -1 && end !== -1 && end > start){
+        return JSON.parse(clean.substring(start, end + 1));
+      }
+      throw e;
+    }
+  }
+
   async function callVoxa(system, userContent){
     var response = await fetch('/.netlify/functions/generate', {
       method: 'POST',
@@ -329,12 +354,14 @@
     });
     var data = await response.json();
     if(!response.ok){
-      throw new Error(data.error || 'Error llamando a Voxa.');
+      throw new Error('Función respondió ' + response.status + ': ' + (data.error || 'sin detalle'));
     }
     var textBlock = (data.content || []).find(function(b){ return b.type === 'text'; });
     var raw = textBlock ? textBlock.text : '';
-    var clean = raw.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
+    if(!raw){
+      throw new Error('Respuesta vacía de Voxa.');
+    }
+    return extractJson(raw);
   }
 
   async function generate(){
@@ -379,6 +406,8 @@
   });
 
   var onboardingEl = document.getElementById('voxa-onboarding');
+  var welcomeEl = document.getElementById('voxa-welcome');
+  var welcomeStartBtn = document.getElementById('voxa-welcome-start');
   var mainEl = document.getElementById('voxa-main');
   var onbProgressFill = document.getElementById('voxa-onb-progress-fill');
   var onbStepLabel = document.getElementById('voxa-onb-step');
@@ -488,7 +517,7 @@
       activateMainScreen();
     }catch(err){
       console.error(err);
-      onbStatus.textContent = 'No se pudo crear el perfil. Intenta de nuevo.';
+      onbStatus.textContent = 'No se pudo crear el perfil: ' + err.message;
       onbStatus.className = 'voxa-status error';
     }finally{
       onbNextBtn.disabled = false;
@@ -505,9 +534,18 @@
     currentQuestion = 0;
     answers = {};
     mainEl.classList.remove('show');
+    welcomeEl.classList.remove('show');
     onboardingEl.classList.add('show');
     renderQuestion();
   }
+
+  function showWelcome(){
+    mainEl.classList.remove('show');
+    onboardingEl.classList.remove('show');
+    welcomeEl.classList.add('show');
+  }
+
+  welcomeStartBtn.addEventListener('click', startOnboarding);
 
   editProfileBtn.addEventListener('click', function(){
     startOnboarding();
@@ -522,7 +560,7 @@
         return;
       }
     }catch(e){}
-    startOnboarding();
+    showWelcome();
   }
 
   init();
